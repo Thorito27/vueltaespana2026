@@ -1,0 +1,23 @@
+{
+  "_INSTRUCCIONES": "Edita este archivo tras cada etapa y haz commit. El visor lo lee al abrirse. NO borres las comillas ni las comas. Fecha de última actualización abajo.",
+  "actualizado": "",
+  "ultima_etapa": 0,
+  "_ayuda_abandonos": "Lista de corredores que han abandonado. Escribe el nombre EXACTO como aparece en el visor (panel Equipos). Añade una línea por cada uno, separadas por comas.",
+  "abandonos": [],
+  "_ayuda_clasificaciones": "Top de cada clasificación tras la última etapa. Deja las listas vacías [] si aún no ha empezado la carrera. Formato de cada línea: {\"pos\":1,\"nombre\":\"...\",\"equipo\":\"...\",\"valor\":\"...\"}. En 'general' valor es el tiempo (ej '52:30:14' o '+0:00'); en 'puntos' y 'montana' es el número de puntos; en 'jovenes' el tiempo.",
+  "general": [],
+  "puntos": [],
+  "montana": [],
+  "jovenes": [],
+  "_ayuda_maillots": "Portadores actuales de cada maillot (se resaltan en el visor). Nombre exacto o vacío ''.",
+  "maillots": {
+    "amarillo": "",
+    "verde": "",
+    "lunares": "",
+    "blanco": ""
+  },
+  "_ayuda_ganadores": "Ganador de cada etapa ya disputada. Clave = número de etapa. Ej: \"1\": \"Tadej Pogačar\".",
+  "ganadores_etapa": {},
+  "_ayuda_resultados_etapa": "Resultado (top) de CADA etapa ya disputada, con tiempos. Clave = número de etapa (texto). Cada corredor: {\"pos\":1,\"nombre\":\"...\",\"equipo\":\"...\",\"tiempo\":\"...\"}. El 1º lleva el tiempo total (ej '4:12:33') y el resto la diferencia (ej '+0:14', o 'm.t.' si es el mismo tiempo). Deja {} mientras no haya nada; añade una etapa cuando se dispute. La clasificación GENERAL (que cambia cada día) va arriba en 'general'.",
+  "resultados_etapa": {}
+}
