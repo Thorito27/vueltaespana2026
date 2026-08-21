@@ -1145,37 +1145,33 @@ const SPRINTS={};
    sin verificar. Mientras estén vacíos, la ficha omite la línea de puntos. */
 const KOM_PTS={};
 const SPRINT_PTS='';
-/* ===== Equipos: los 23 del libro de ruta oficial de La Vuelta 2026 =====
-   18 UCI WorldTeams + 3 UCI ProTeams + 2 invitados españoles.
-   Las plantillas (8 corredores por equipo, 184 en total) están PENDIENTES:
-   la lista oficial de dorsales no es accesible desde aquí. */
+/* ===== Equipos: los 23 de La Vuelta 2026 con sus 184 corredores =====
+   Dorsales y nacionalidades de la lista oficial de lavuelta.es.
+   Orden por bloque de dorsal, como en la propia lista. */
 const TEAMS=[
-/* --- UCI WorldTeams --- */
-{name:"Alpecin-Premier Tech",c:["#1b6ec2","#0d2b57"],riders:[]},
-{name:"Bahrain Victorious",c:["#0e7d7d","#1a1a2e"],riders:[]},
-{name:"Decathlon CMA CGM Team",c:["#0f4bd8","#5b2a86"],riders:[]},
-{name:"EF Education-EasyPost",c:["#ff4d94","#e8117f"],riders:[]},
-{name:"Groupama-FDJ United",c:["#1e6bb8","#0a3d7a"],riders:[]},
-{name:"INEOS Grenadiers",c:["#5a6b7a","#1a1a1a"],riders:[]},
-{name:"Lidl-Trek",c:["#2b3a8f","#e30613"],riders:[]},
-{name:"Lotto Intermarché",c:["#e30613","#b00d1e"],riders:[]},
-{name:"Movistar Team",c:["#ffffff","#0a4d9e"],riders:[]},
-{name:"NSN Cycling Team",c:["#f2f2f2","#7b3fa0"],riders:[]},
-{name:"Red Bull-BORA-hansgrohe",c:["#f4f4f4","#15264a"],riders:[]},
-{name:"Soudal Quick-Step",c:["#1e5fa8","#3aa655"],riders:[]},
-{name:"Team Jayco AlUla",c:["#6b3fa0","#3d1f5c"],riders:[]},
-{name:"Team Picnic PostNL",c:["#1a2a5e","#ff6600"],riders:[]},
-{name:"Team Visma | Lease a Bike",c:["#f7c700","#111111"],riders:[]},
-{name:"UAE Team Emirates XRG",c:["#f4f4f4","#8a0d18"],riders:[]},
-{name:"Uno-X Mobility",c:["#e4002b","#ffffff"],riders:[]},
-{name:"XDS Astana Team",c:["#19c3d6","#ffd700"],riders:[]},
-/* --- UCI ProTeams --- */
-{name:"Cofidis",c:["#d0021b","#f5c400"],riders:[]},
-{name:"Pinarello-Q36.5 Pro Cycling Team",c:["#1a2b4a","#2e5a8a"],riders:[]},
-{name:"Tudor Pro Cycling Team",c:["#1a1a1a","#c8102e"],riders:[]},
-/* --- Invitados / wild cards --- */
-{name:"Burgos-Burpellet BH",c:["#f2f2f2","#7b3fa0"],riders:[]},
-{name:"Equipo Kern Pharma",c:["#00a651","#0d5c2e"],riders:[]}
+{name:"Red Bull-BORA-hansgrohe",c:["#f4f4f4","#15264a"],riders:[["Primož Roglič","SLO",1],["Finn Fisher-Black","NZL",2],["Jordi Meeus","BEL",3],["Gianni Moscon","ITA",4],["Callum Thornley","GBR",5],["Luke Tuckwell","AUS",6],["Gianni Vermeersch","BEL",7],["Frederik Wandahl","DEN",8]]},
+{name:"UAE Team Emirates XRG",c:["#f4f4f4","#8a0d18"],riders:[["Tadej Pogačar","SLO",11],["João Almeida","POR",12],["Domen Novak","SLO",13],["Ivo Oliveira","POR",14],["Pavel Sivakov","FRA",15],["Pablo Torres Arias","ESP",16],["Kevin Vermaerke","USA",17],["Jay Vine","AUS",18]]},
+{name:"Movistar Team",c:["#ffffff","#0a4d9e"],riders:[["Enric Mas","ESP",21],["Jorge Arcas","ESP",22],["Orluis Aular Sanabria","VEN",23],["Carlos Canal Blanco","ESP",24],["Pablo Castrillo","ESP",25],["Raúl García","ESP",26],["Iván Romeo Abad","ESP",27],["Cian Uijtdebroeks","BEL",28]]},
+{name:"Team Visma | Lease a Bike",c:["#f7c700","#111111"],riders:[["Wout van Aert","BEL",31],["Bruno Armirail","FRA",32],["James Brennan","GBR",33],["Steven Kruijswijk","NED",34],["Sepp Kuss","USA",35],["Christophe Laporte","FRA",36],["Jørgen Nordhagen","NOR",37],["Ben Tulett","GBR",38]]},
+{name:"Decathlon CMA CGM Team",c:["#0f4bd8","#5b2a86"],riders:[["Félix Gall","AUT",41],["Léo Bisiaux","FRA",42],["Andrew Chamberlain","AUS",43],["Sander De Pestel","BEL",44],["Jordan Labrosse","FRA",45],["Gregor Mühlberger","AUT",46],["Matthew Riccitello","USA",47],["Callum Scotson","AUS",48]]},
+{name:"Pinarello-Q36.5",c:["#1a2b4a","#2e5a8a"],riders:[["David de la Cruz","ESP",51],["Xabier Azparren Irurzun","ESP",52],["Walter Calzoni","ITA",53],["Marcel Camprubí Pijuan","ESP",54],["Eddie Dunbar","IRL",55],["Thomas Gloag","GBR",56],["David González López","ESP",57],["Milan Vader","NED",58]]},
+{name:"Netcompany-INEOS",c:["#5a6b7a","#1a1a1a"],riders:[["Oscar Onley","GBR",61],["Jack Haig","AUS",62],["Lucas Hamilton","AUS",63],["Axel Laurance","FRA",64],["Carlos Rodríguez","ESP",65],["Embret Svestad-Bårdseng","NOR",66],["Joshua Tarling","GBR",67],["Ben Turner","GBR",68]]},
+{name:"Bahrain Victorious",c:["#0e7d7d","#1a1a2e"],riders:[["Pello Bilbao","ESP",71],["Santiago Buitrago","COL",72],["Roman Ermakov","SLO",73],["Matevž Govekar","SLO",74],["Pau Miquel Delgado","ESP",75],["Jakob Omrzel","SLO",76],["Mathijs Paasschens","NED",77],["Attila Valter","HUN",78]]},
+{name:"Lidl-Trek",c:["#2b3a8f","#e30613"],riders:[["Mattias Skjelmose","DEN",81],["Julien Bernard","FRA",82],["Lennard Kämna","GER",83],["Patrick Konrad","AUT",84],["Jacopo Mosca","ITA",85],["Mathias Norsgaard","DEN",86],["Thibau Nys","BEL",87],["Mads Pedersen","DEN",88]]},
+{name:"Groupama-FDJ United",c:["#1e6bb8","#0a3d7a"],riders:[["Clément Berthet","FRA",91],["Olivier Le Gac","FRA",92],["Valentin Madouas","FRA",93],["Guillaume Martin Guyonnet","FRA",94],["Rudy Molard","FRA",95],["Enzo Paleni","FRA",96],["Rémy Rochas","FRA",97],["Bastien Tronchon","FRA",98]]},
+{name:"Alpecin-Premier Tech",c:["#1b6ec2","#0d2b57"],riders:[["Kaden Groves","AUS",101],["Francesco Busatto","ITA",102],["Lindsay De Vylder","BEL",103],["Ramses Debruyne","BEL",104],["Gal Glivar","SLO",105],["Michael Gogl","AUT",106],["Hugo Houle","CAN",107],["Sente Sentjens","BEL",108]]},
+{name:"NSN Cycling Team",c:["#f2f2f2","#7b3fa0"],riders:[["Alexey Lutsenko","KAZ",111],["George Bennett","NZL",112],["Jan Hirt","CZE",113],["Hugo Hofstetter","FRA",114],["Moritz Kretschy","GER",115],["Pau Martí Soriano","ESP",116],["Nicholas Schultz","AUS",117],["Floris Van Tricht","BEL",118]]},
+{name:"Soudal Quick-Step",c:["#1e5fa8","#3aa655"],riders:[["Mikel Landa","ESP",121],["Alberto Dainese","ITA",122],["Gianmarco Garofoli","ITA",123],["Ethan Hayter","GBR",124],["Valentin Paret-Peintre","FRA",125],["Fabio Van den Bossche","BEL",126],["Mauri Vansevenant","BEL",127],["Filippo Zana","ITA",128]]},
+{name:"Uno-X Mobility",c:["#e4002b","#ffffff"],riders:[["Magnus Cort Nielsen","DEN",131],["Simon Dalby","DEN",132],["Fredrik Dversnes","NOR",133],["Tobias Johannessen","NOR",134],["Andreas Kron","DEN",135],["Andreas Leknessund","NOR",136],["Rasmus Tiller","NOR",137],["Martin Tjøtta","NOR",138]]},
+{name:"Cofidis",c:["#d0021b","#f5c400"],riders:[["Emanuel Buchmann","GER",141],["Bryan Coquard","FRA",142],["Alex Kirsch","LUX",143],["Sylvain Moniquet","BEL",144],["Paul Ourselin","FRA",145],["Alexis Renard","FRA",146],["Louis Rouland","FRA",147],["Sergio Samitier","ESP",148]]},
+{name:"Team Jayco AlUla",c:["#6b3fa0","#3d1f5c"],riders:[["Alessandro Covi","ITA",151],["Koen Bouwman","NED",152],["Paul Double","GBR",153],["Asbjørn Hellemose","DEN",154],["Hamish McKenzie","AUS",155],["Finlay Pickering","GBR",156],["Rudy Porter","AUS",157],["Jasha Sütterlin","GER",158]]},
+{name:"EF Education-EasyPost",c:["#ff4d94","#e8117f"],riders:[["Richard Carapaz","ECU",161],["Vincenzo Albanese","ITA",162],["Markel Beloki","ESP",163],["Alastair MacKellar","AUS",164],["Darren Rafferty","IRL",165],["Juan Felipe Rodríguez Contreras","COL",166],["James Shaw","GBR",167],["Georg Steinhauser","GER",168]]},
+{name:"Tudor Pro Cycling Team",c:["#1a1a1a","#c8102e"],riders:[["Marco Brenner","GER",171],["William Barta","USA",172],["Arthur Kluckers","LUX",173],["Stefan Küng","SUI",174],["Roland Thalmann","SUI",175],["Lawrence Warbasse","USA",176],["Fabian Weiss","SUI",177],["Hannes Wilksch","GER",178]]},
+{name:"XDS Astana Team",c:["#19c3d6","#ffd700"],riders:[["Harold Tejada","COL",181],["Yevgeniy Fedorov","KAZ",182],["Lorenzo Fortunato","ITA",183],["Victor Langellotti","MON",184],["Henok Mulueberhan","ERI",185],["Cristian Rodríguez","ESP",186],["Alessandro Romele","ITA",187],["Darren van Bekkum","NED",188]]},
+{name:"Burgos-Burpellet BH",c:["#f2f2f2","#7b3fa0"],riders:[["Jesús Herrada","ESP",191],["Clément Alleno","FRA",192],["Mario Aparicio Muñoz","ESP",193],["Sergio Chumil González","GUA",194],["José Manuel Díaz Gallego","ESP",195],["José Luis Faura Asensio","ESP",196],["Sinuhé Fernández Rodríguez","ESP",197],["César Macías Estrada","MEX",198]]},
+{name:"Lotto Intermarché",c:["#e30613","#b00d1e"],riders:[["Jarno Widar","BEL",201],["Vito Braet","BEL",202],["Lars Craps","BEL",203],["Steffen De Schuyteneer","BEL",204],["Lorenzo Rota","ITA",205],["Reuben Thompson","NZL",206],["Luca Van Boven","BEL",207],["Roel van Sintmaartensdijk","NED",208]]},
+{name:"Team Picnic PostNL",c:["#1a2a5e","#ff6600"],riders:[["Christopher Hamilton","AUS",211],["Timo de Jong","NED",212],["Mattia Gaffuri","ITA",213],["Gijs Leemreize","NED",214],["Guillermo Martínez Huertas","COL",215],["Oliver Peace","GBR",216],["Henri Renard Haquin","FRA",217],["Timo Roosen","NED",218]]},
+{name:"Equipo Kern Pharma",c:["#00a651","#0d5c2e"],riders:[["Urko Berrade Fernández","ESP",221],["Marc Brustenga Masagué","ESP",222],["Iván Cobo Cayón","ESP",223],["Iñigo Elosegui Momeñe","ESP",224],["Ibon Ruiz Sedano","ESP",225],["Iván Sosa","COL",226],["Diego Uriarte Belzunegi","ESP",227],["Mats Wenzel","LUX",228]]}
 ];
 /* ===== Fichas de puertos: historia y récords documentados ===== */
 const CLIMB_INFO={};
