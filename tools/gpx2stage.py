@@ -14,20 +14,55 @@ import xml.etree.ElementTree as ET
 
 GPX_NS = ('http://www.topografix.com/GPX/1/0', 'http://www.topografix.com/GPX/1/1')
 
+# Tolerancia admitida entre la distancia oficial y la medida sobre el GPX.
+# Las dos son fuentes legítimas y no tienen por qué coincidir: el GPX puede
+# incluir o excluir tramos neutralizados y vueltas a circuitos de meta. No es un
+# error que haya que resolver. El visor guarda las dos (distance_km es la
+# oficial, gpx_km la medida) y convierte entre trazado y kilometraje con la
+# razón distance_km/gpx_km, así que la ficha, los puertos y los horarios
+# siempre van en kilómetros oficiales aunque el trazado mida otra cosa.
+# Por encima de este umbral solo se avisa, no se bloquea.
+TOLERANCIA_PCT = 5.0
+
 
 def read_gpx(path):
+    """Devuelve [(lon, lat, ele)]. Algunos GPX oficiales traen <trkpt> sin <ele>;
+    esos huecos se interpolan entre vecinos conocidos. Ponerlos a 0 metería un
+    desplome al nivel del mar en el perfil e inflaría el desnivel acumulado."""
     root = ET.parse(path).getroot()
-    pts = []
+    pts, missing = [], 0
     for ns in GPX_NS:
         for p in root.iter(f'{{{ns}}}trkpt'):
             ele = p.find(f'{{{ns}}}ele')
-            pts.append((float(p.get('lon')), float(p.get('lat')),
-                        float(ele.text) if ele is not None else 0.0))
+            if ele is None or ele.text is None:
+                missing += 1
+                pts.append([float(p.get('lon')), float(p.get('lat')), None])
+            else:
+                pts.append([float(p.get('lon')), float(p.get('lat')), float(ele.text)])
         if pts:
             break
     if not pts:
         sys.exit(f'{path}: no se encontró ningún <trkpt>. ¿Es un GPX de verdad?')
-    return pts
+
+    known = [i for i, q in enumerate(pts) if q[2] is not None]
+    if not known:
+        sys.exit(f'{path}: ningún punto trae elevación.')
+    for i, q in enumerate(pts):
+        if q[2] is not None:
+            continue
+        prev = max((k for k in known if k < i), default=None)
+        nxt = min((k for k in known if k > i), default=None)
+        if prev is None:
+            q[2] = pts[nxt][2]
+        elif nxt is None:
+            q[2] = pts[prev][2]
+        else:
+            f = (i - prev) / (nxt - prev)
+            q[2] = pts[prev][2] + f * (pts[nxt][2] - pts[prev][2])
+    if missing:
+        print(f'  aviso      {missing} punto(s) sin <ele>: elevación interpolada',
+              file=sys.stderr)
+    return [tuple(q) for q in pts]
 
 
 def haversine(a, b):
@@ -130,6 +165,14 @@ def main():
     err = abs(total_km(simple) - gpx_km) / gpx_km * 100
 
     print(f'{a.gpx}', file=sys.stderr)
+    if a.distance_km is not None:
+        desvio = (gpx_km - a.distance_km) / a.distance_km * 100
+        if abs(desvio) > TOLERANCIA_PCT:
+            print(f'  TOLERANCIA  el GPX mide {gpx_km:.1f} km frente a los '
+                  f'{a.distance_km} oficiales ({desvio:+.1f} %, por encima del '
+                  f'{TOLERANCIA_PCT} % admitido). Se conserva la cifra oficial en '
+                  f'distance_km; el visor escala el trazado en proporción.',
+                  file=sys.stderr)
     print(f'  puntos      {len(raw)} -> {len(simple)}  (tolerancia {tol:.1f} m)',
           file=sys.stderr)
     print(f'  longitud    {gpx_km:.1f} km  (tras simplificar: '
