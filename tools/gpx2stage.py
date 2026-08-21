@@ -14,6 +14,16 @@ import xml.etree.ElementTree as ET
 
 GPX_NS = ('http://www.topografix.com/GPX/1/0', 'http://www.topografix.com/GPX/1/1')
 
+# Tolerancia admitida entre la distancia oficial y la medida sobre el GPX.
+# Las dos son fuentes legítimas y no tienen por qué coincidir: el GPX puede
+# incluir o excluir tramos neutralizados y vueltas a circuitos de meta. No es un
+# error que haya que resolver. El visor guarda las dos (distance_km es la
+# oficial, gpx_km la medida) y convierte entre trazado y kilometraje con la
+# razón distance_km/gpx_km, así que la ficha, los puertos y los horarios
+# siempre van en kilómetros oficiales aunque el trazado mida otra cosa.
+# Por encima de este umbral solo se avisa, no se bloquea.
+TOLERANCIA_PCT = 5.0
+
 
 def read_gpx(path):
     """Devuelve [(lon, lat, ele)]. Algunos GPX oficiales traen <trkpt> sin <ele>;
@@ -155,6 +165,14 @@ def main():
     err = abs(total_km(simple) - gpx_km) / gpx_km * 100
 
     print(f'{a.gpx}', file=sys.stderr)
+    if a.distance_km is not None:
+        desvio = (gpx_km - a.distance_km) / a.distance_km * 100
+        if abs(desvio) > TOLERANCIA_PCT:
+            print(f'  TOLERANCIA  el GPX mide {gpx_km:.1f} km frente a los '
+                  f'{a.distance_km} oficiales ({desvio:+.1f} %, por encima del '
+                  f'{TOLERANCIA_PCT} % admitido). Se conserva la cifra oficial en '
+                  f'distance_km; el visor escala el trazado en proporción.',
+                  file=sys.stderr)
     print(f'  puntos      {len(raw)} -> {len(simple)}  (tolerancia {tol:.1f} m)',
           file=sys.stderr)
     print(f'  longitud    {gpx_km:.1f} km  (tras simplificar: '
