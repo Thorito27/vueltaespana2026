@@ -16,18 +16,43 @@ GPX_NS = ('http://www.topografix.com/GPX/1/0', 'http://www.topografix.com/GPX/1/
 
 
 def read_gpx(path):
+    """Devuelve [(lon, lat, ele)]. Algunos GPX oficiales traen <trkpt> sin <ele>;
+    esos huecos se interpolan entre vecinos conocidos. Ponerlos a 0 metería un
+    desplome al nivel del mar en el perfil e inflaría el desnivel acumulado."""
     root = ET.parse(path).getroot()
-    pts = []
+    pts, missing = [], 0
     for ns in GPX_NS:
         for p in root.iter(f'{{{ns}}}trkpt'):
             ele = p.find(f'{{{ns}}}ele')
-            pts.append((float(p.get('lon')), float(p.get('lat')),
-                        float(ele.text) if ele is not None else 0.0))
+            if ele is None or ele.text is None:
+                missing += 1
+                pts.append([float(p.get('lon')), float(p.get('lat')), None])
+            else:
+                pts.append([float(p.get('lon')), float(p.get('lat')), float(ele.text)])
         if pts:
             break
     if not pts:
         sys.exit(f'{path}: no se encontró ningún <trkpt>. ¿Es un GPX de verdad?')
-    return pts
+
+    known = [i for i, q in enumerate(pts) if q[2] is not None]
+    if not known:
+        sys.exit(f'{path}: ningún punto trae elevación.')
+    for i, q in enumerate(pts):
+        if q[2] is not None:
+            continue
+        prev = max((k for k in known if k < i), default=None)
+        nxt = min((k for k in known if k > i), default=None)
+        if prev is None:
+            q[2] = pts[nxt][2]
+        elif nxt is None:
+            q[2] = pts[prev][2]
+        else:
+            f = (i - prev) / (nxt - prev)
+            q[2] = pts[prev][2] + f * (pts[nxt][2] - pts[prev][2])
+    if missing:
+        print(f'  aviso      {missing} punto(s) sin <ele>: elevación interpolada',
+              file=sys.stderr)
+    return [tuple(q) for q in pts]
 
 
 def haversine(a, b):
