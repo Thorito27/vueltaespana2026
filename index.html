@@ -236,6 +236,25 @@
   .peakcard .kom{margin-top:9px;padding:8px 10px;border-radius:9px;background:rgba(255,212,0,.09);border:1px solid rgba(255,212,0,.25);font:500 11.5px/1.45 Inter}
   .peakcard .kom b{color:var(--jaune)}
   .peakcard .notas{margin-top:8px;font:500 11.5px/1.5 Inter;color:#cdd6e0}
+  .btn.gps[data-busy]{opacity:.6;pointer-events:none}
+  .gpsdot{width:18px;height:18px;border-radius:50%;background:#2f8fff;border:3px solid #fff;
+    box-shadow:0 0 0 2px rgba(47,143,255,.45),0 2px 8px rgba(0,0,0,.5);cursor:default}
+  .gpsdot::after{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(47,143,255,.55);
+    animation:gpspulse 1.8s ease-out infinite}
+  @keyframes gpspulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+  .gpscard{position:absolute;left:14px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:8;width:min(320px,calc(100vw - 28px));
+    padding:13px 14px;border-radius:13px;background:var(--panel);border:1px solid var(--panel-line);
+    backdrop-filter:blur(10px);color:var(--text);display:none;box-shadow:0 8px 26px rgba(0,0,0,.45)}
+  .gpscard.show{display:block}
+  .gpscard .x{position:absolute;top:8px;right:10px;background:none;border:0;color:var(--muted);font:700 16px/1 Inter;cursor:pointer}
+  .gpscard h3{margin:0 0 1px;font:600 17px/1.15 Oswald;display:flex;align-items:center;gap:7px}
+  .gpscard .sub{font:500 11px/1.35 Inter;color:var(--muted);margin-bottom:9px}
+  .gpscard .stats{display:flex;gap:16px;flex-wrap:wrap}
+  .gpscard .stats div{font:600 15px/1 Oswald}
+  .gpscard .stats span{display:block;font:600 9px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  .gpscard .nota{margin-top:10px;padding:7px 9px;border-radius:8px;font:500 11px/1.45 Inter;
+    background:rgba(47,143,255,.10);border:1px solid rgba(47,143,255,.28)}
+  .gpscard .nota.lejos{background:rgba(228,3,46,.10);border-color:rgba(228,3,46,.30)}
   .teamsbtn{position:absolute;top:calc(64px + env(safe-area-inset-top));right:14px;z-index:6;height:34px;padding:0 12px;border-radius:10px;
     border:1px solid var(--panel-line);background:var(--panel);backdrop-filter:blur(8px);color:#eef2f7;
     font:600 12px Inter;cursor:pointer}
@@ -342,6 +361,7 @@
 <div class="todaytoast" id="todaytoast" role="status" aria-live="polite"></div>
 <div class="teamspanel" id="teamspanel"></div>
 <div class="peakcard" id="peakcard"></div>
+<div class="gpscard" id="gpscard" role="status" aria-live="polite"></div>
 <div class="keyhint">⌨ ← → girar · ↑ ↓ inclinar</div>
 
 <div class="dock">
@@ -354,6 +374,7 @@
     <button class="btn" id="toggleProfile" aria-pressed="true" title="Ocultar perfil">📈 <span class="lbl">Perfil</span></button>
     <button class="btn" id="meteobtn" aria-pressed="false" title="Previsión meteorológica">🌦️ <span class="lbl">Meteo</span></button>
     <button class="btn" id="finalbtn" title="Clasificación final de La Vuelta">🏆 <span class="lbl">Final</span></button>
+    <button class="btn gps" id="gpsbtn" title="Situar mi posición GPS en el recorrido">📍 <span class="lbl">Mi posición</span></button>
     <div class="spacer"></div>
     <div class="speed" role="group" aria-label="Velocidad">
       <button data-speed="0.5">0.5×</button>
@@ -1059,6 +1080,121 @@ function goToday(){
   }
 }
 document.getElementById('todaybtn').onclick=goToday;
+
+/* ===== Mi posición: en qué punto del recorrido estoy =====
+   Recorre las 21 etapas, no solo la que esté abierta: si estás esperando en
+   Sierra Nevada lo suyo es que te diga la etapa 20, no el kilómetro de la que
+   tuvieras seleccionada. */
+let gpsMarker=null;
+
+/* Proyecta un punto sobre el segmento a-b. Los vértices del trazado van cada
+   150-350 m, así que quedarse en el vértice más cercano erraría hasta la mitad
+   de esa distancia; proyectar sobre el segmento afina a metros. */
+function proyectaEnSegmento(p,a,b){
+  const kx=Math.cos(rad((a[1]+b[1])/2))*111320, ky=110540;
+  const px=(p[0]-a[0])*kx, py=(p[1]-a[1])*ky;
+  const bx=(b[0]-a[0])*kx, by=(b[1]-a[1])*ky;
+  const seg=bx*bx+by*by;
+  const t=seg?Math.max(0,Math.min(1,(px*bx+py*by)/seg)):0;
+  return {t,dist:Math.hypot(px-t*bx,py-t*by),
+          lng:a[0]+(b[0]-a[0])*t, lat:a[1]+(b[1]-a[1])*t};
+}
+
+function puntoMasCercano(lng,lat){
+  const p=[lng,lat]; let mejor=null;
+  for(const st of DATA.stages){
+    const c=st.coords;
+    let bi=0,bd=Infinity;
+    for(let i=0;i<c.length;i++){const d=hav(p,c[i]); if(d<bd){bd=d;bi=i;}}
+    let ref={dist:bd,i:bi,t:0,lng:c[bi][0],lat:c[bi][1],ele:c[bi][2]};
+    for(const i of [bi-1,bi]){
+      if(i<0||i+1>=c.length)continue;
+      const pr=proyectaEnSegmento(p,c[i],c[i+1]);
+      if(pr.dist<ref.dist)ref={dist:pr.dist,i,t:pr.t,lng:pr.lng,lat:pr.lat,
+        ele:c[i][2]+(c[i+1][2]-c[i][2])*pr.t};
+    }
+    if(!mejor||ref.dist<mejor.dist)mejor={...ref,stage:st};
+  }
+  return mejor;
+}
+
+/* Kilómetro OFICIAL, no el medido sobre el GPX: se escala igual que en el resto
+   del visor, con la razón distance_km/gpx_km. */
+function kmOficialEn(st,i,t){
+  const c=st.coords; let acc=0;
+  for(let k=1;k<=i;k++)acc+=hav(c[k-1],c[k]);
+  if(t>0&&i+1<c.length)acc+=hav(c[i],c[i+1])*t;
+  return acc/(st.gpx_km*1000)*st.distance_km;
+}
+
+const fmtDist=m=>m<1000?Math.round(m)+' m':(m/1000).toFixed(m<10000?1:0).replace('.',',')+' km';
+const fmtKm=k=>k.toFixed(1).replace('.',',');
+
+function cierraGps(){
+  document.getElementById('gpscard').classList.remove('show');
+  if(gpsMarker){gpsMarker.remove();gpsMarker=null;}
+}
+
+function pintaMiPosicion(lng,lat,precision){
+  const m=puntoMasCercano(lng,lat);
+  const st=m.stage;
+  const km=kmOficialEn(st,m.i,m.t);
+  const restan=st.distance_km-km;
+
+  if(st.number!==(stage&&stage.number)){
+    const sel=document.getElementById('stage'); if(sel)sel.value=st.number;
+    loadStage(st.number);
+  }
+
+  if(gpsMarker)gpsMarker.remove();
+  const el=document.createElement('div'); el.className='gpsdot';
+  el.title='Tu posición';
+  gpsMarker=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([lng,lat]).addTo(map);
+
+  const lejos=m.dist>2000;
+  const c=document.getElementById('gpscard');
+  c.innerHTML='<button class="x" aria-label="Cerrar">✕</button>'+
+    '<h3>📍 Tu posición</h3>'+
+    '<div class="sub">Etapa '+st.number+' · '+st.title+'</div>'+
+    '<div class="stats">'+
+      '<div><span>Kilómetro</span>km '+fmtKm(km)+' de '+fmtKm(st.distance_km)+'</div>'+
+      '<div><span>Para meta</span>'+fmtKm(restan)+' km</div>'+
+      '<div><span>Altitud</span>'+Math.round(m.ele)+' m</div>'+
+    '</div>'+
+    '<div class="nota'+(lejos?' lejos':'')+'">'+
+      (lejos?'Estás a <b>'+fmtDist(m.dist)+'</b> del trazado, así que este punto es solo el más cercano de las 21 etapas.'
+            :'Estás a <b>'+fmtDist(m.dist)+'</b> del trazado.')+
+      (precision?' Precisión del GPS: ±'+Math.round(precision)+' m.':'')+
+    '</div>';
+  c.querySelector('.x').onclick=cierraGps;
+  c.classList.add('show');
+
+  // encuadre que incluye tu posición y el punto del recorrido
+  const b=new maplibregl.LngLatBounds([lng,lat],[lng,lat]);
+  b.extend([m.lng,m.lat]);
+  map.fitBounds(b,{padding:{top:90,bottom:190,left:60,right:60},maxZoom:15,duration:900});
+  return m;
+}
+
+function miPosicion(){
+  const btn=document.getElementById('gpsbtn');
+  if(!navigator.geolocation){showTodayToast('Este navegador no permite geolocalización');return;}
+  if(!window.isSecureContext){showTodayToast('La geolocalización necesita una conexión segura (HTTPS)');return;}
+  const lbl=btn.querySelector('.lbl'), texto=lbl?lbl.textContent:'';
+  btn.dataset.busy='1'; if(lbl)lbl.textContent='Buscando…';
+  const fin=()=>{delete btn.dataset.busy; if(lbl)lbl.textContent=texto;};
+  navigator.geolocation.getCurrentPosition(pos=>{
+    fin();
+    pintaMiPosicion(pos.coords.longitude,pos.coords.latitude,pos.coords.accuracy);
+  },err=>{
+    fin();
+    showTodayToast({1:'Permiso de ubicación denegado',
+                    2:'No se ha podido obtener la ubicación',
+                    3:'El GPS ha tardado demasiado en responder'}[err.code]
+                   ||'No se ha podido obtener la ubicación');
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
+}
+document.getElementById('gpsbtn').onclick=miPosicion;
 
 /* ===== Clasificación final de La Vuelta (botón 🏆 Final) ===== */
 function renderFinal(){
